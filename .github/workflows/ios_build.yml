@@ -1,4 +1,4 @@
-name: Build iOS App for Appetize
+name: Build iOS Framework
 
 on:
   push:
@@ -21,22 +21,13 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Build iOS App with Xcode
+    - name: Build KMP iOS Simulator Framework
       run: |
-        xcodebuild -project iosApp/iosApp.xcodeproj \
-                   -scheme iosApp \
-                   -sdk iphonesimulator \
-                   -configuration Debug \
-                   -derivedDataPath build/ \
-                   ONLY_ACTIVE_ARCH=NO
+        chmod +x gradlew
+        ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
-    - name: Compress .app bundle
-      run: |
-        cd build/Build/Products/Debug-iphonesimulator
-        zip -r iosApp.app.zip iosApp.app
-
-    - name: Upload Artifact to GitHub
+    - name: Upload Framework Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ios-simulator-app
-        path: build/Build/Products/Debug-iphonesimulator/iosApp.app.zip
+        name: ios-kmp-framework
+        path: composeApp/build/bin/iosSimulatorArm64/debugFramework/
