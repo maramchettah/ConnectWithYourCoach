@@ -29,37 +29,34 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Generate Xcode Project
+    - name: Create Xcode Project Spec
       run: |
         cat << 'EOF' > project.yml
         name: iosApp
         options:
           bundleIdPrefix: com.pfe.connectcoach
+          deploymentTarget:
+            iOS: "15.0"
         targets:
           iosApp:
             type: application
             platform: iOS
-            deploymentTarget: "15.0"
             sources:
-              - iosApp
-            info:
-              path: iosApp/Info.plist
-              properties:
-                UILaunchScreen: {}
-                CFBundleExecutable: $(EXECUTABLE_NAME)
-                CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-                CFBundleName: $(PRODUCT_NAME)
-                CFBundleShortVersionString: "1.0"
-                CFBundleVersion: "1"
+              - path: iosApp/iosApp
             settings:
               base:
+                PRODUCT_BUNDLE_IDENTIFIER: com.pfe.connectcoach.iosApp
                 GENERATE_INFOPLIST_FILE: YES
+                INFOPLIST_KEY_UILaunchScreen_Generation: YES
                 CODE_SIGNING_ALLOWED: "NO"
                 CODE_SIGNING_REQUIRED: "NO"
                 CODE_SIGN_IDENTITY: ""
-                PRODUCT_BUNDLE_IDENTIFIER: com.pfe.connectcoach.iosApp
-                FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/composeApp/build/bin/iosSimulatorArm64/debugFramework
-                OTHER_LDFLAGS: $(inherited) -framework composeApp
+                FRAMEWORK_SEARCH_PATHS:
+                  - $(inherited)
+                  - $(SRCROOT)/composeApp/build/bin/iosSimulatorArm64/debugFramework
+                OTHER_LDFLAGS:
+                  - $(inherited)
+                  - -framework composeApp
         EOF
         xcodegen generate
 
@@ -71,6 +68,8 @@ jobs:
                    -configuration Debug \
                    -derivedDataPath build/ \
                    CODE_SIGNING_ALLOWED=NO \
+                   CODE_SIGNING_REQUIRED=NO \
+                   CODE_SIGN_IDENTITY="" \
                    ONLY_ACTIVE_ARCH=NO
 
     - name: Compress .app bundle
