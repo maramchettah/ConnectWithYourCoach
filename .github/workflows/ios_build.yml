@@ -26,17 +26,40 @@ jobs:
         chmod +x gradlew
         ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
+    - name: Install XcodeGen
+      run: brew install xcodegen
+
+    - name: Generate Xcode Project
+      run: |
+        cat << 'EOF' > project.yml
+        name: iosApp
+        options:
+          bundleIdPrefix: com.pfe.connectcoach
+        targets:
+          iosApp:
+            type: application
+            platform: iOS
+            deploymentTarget: "15.0"
+            sources:
+              - iosApp
+            settings:
+              base:
+                PRODUCT_BUNDLE_IDENTIFIER: com.pfe.connectcoach.iosApp
+                FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/composeApp/build/bin/iosSimulatorArm64/debugFramework
+                OTHER_LDFLAGS: $(inherited) -framework composeApp
+        EOF
+        xcodegen generate
+
     - name: Build iOS App with Xcode
       run: |
-        XCODEPROJ=$(find . -name "*.xcodeproj" | head -n 1)
-        xcodebuild -project "$XCODEPROJ" \
+        xcodebuild -project iosApp.xcodeproj \
                    -scheme iosApp \
                    -sdk iphonesimulator \
                    -configuration Debug \
                    -derivedDataPath build/ \
                    ONLY_ACTIVE_ARCH=NO
 
-    - name: Compress .app bundle for Appetize
+    - name: Compress .app bundle
       run: |
         cd build/Build/Products/Debug-iphonesimulator
         zip -r iosApp.app.zip iosApp.app
