@@ -23,6 +23,8 @@ import com.pfe.connectcoach.ui.theme.ConnectCoachTheme
 fun App() {
     ConnectCoachTheme {
         var tab by remember { mutableStateOf(AppTab.Home) }
+        var selectedCoachId by remember { mutableStateOf(SampleData.coaches.first().id) }
+        val selectedCoach = SampleData.coaches.first { it.id == selectedCoachId }
         val chat = remember { mutableStateListOf<ChatMessage>().apply { addAll(SampleData.chat) } }
 
         Scaffold(
@@ -34,11 +36,15 @@ fun App() {
                 when (tab) {
                     AppTab.Home -> ClientHomeScreen(
                         state = SampleData.home,
+                        coaches = SampleData.coaches,
+                        selectedCoachId = selectedCoachId,
+                        onSelectCoach = { selectedCoachId = it.id },
+                        onOpenCoach = { tab = AppTab.Coach },
                         onViewWorkout = { /* TODO: navigate to workout details */ },
                         onCategoryClick = { if (it == "AI Assistant") tab = AppTab.Assistant },
                     )
                     AppTab.Coach -> CoachScreen(
-                        state = SampleData.coach,
+                        state = selectedCoach,
                         onMessageCoach = { /* TODO: open chat with coach */ },
                     )
                     AppTab.Assistant -> AssistantScreen(

@@ -49,14 +49,12 @@ fun CoachScreen(state: CoachState, onMessageCoach: () -> Unit, modifier: Modifie
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(AppColors.SageLight)) {
             Canvas(Modifier.matchParentSize()) {
                 drawCircle(AppColors.Sage.copy(alpha = 0.8f), 100.dp.toPx(), Offset(0f, 0f))
-                drawCircle(Color(0xFFE6D9BD), 85.dp.toPx(), Offset(size.width, size.height))
+                drawCircle(AppColors.Sand, 85.dp.toPx(), Offset(size.width, size.height))
             }
             Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    Modifier.size(96.dp).clip(CircleShape).background(AppColors.Forest)
-                        .border(5.dp, AppColors.Cream, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Rounded.Person, null, tint = AppColors.Sage, modifier = Modifier.size(60.dp)) }
+                Box(Modifier.border(5.dp, AppColors.Cream, CircleShape).padding(5.dp)) {
+                    CoachAvatar(state.avatar, 86.dp)
+                }
                 Spacer(Modifier.height(12.dp))
                 Text(state.name, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
                 Text(state.specialization, fontSize = 14.sp, color = AppColors.Muted)
@@ -84,7 +82,7 @@ fun CoachScreen(state: CoachState, onMessageCoach: () -> Unit, modifier: Modifie
         SectionTitle("Your Current Plan")
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             PlanCard("Workout", state.workoutPlan, Icons.Rounded.FitnessCenter, AppColors.SageLight, Modifier.weight(1f))
-            PlanCard("Nutrition", state.nutritionPlan, Icons.Rounded.Restaurant, Color(0xFFE6D9BD), Modifier.weight(1f))
+            PlanCard("Nutrition", state.nutritionPlan, Icons.Rounded.Restaurant, AppColors.Sand, Modifier.weight(1f))
         }
 
         SectionTitle("Recent Progress", "Last 4 weeks")

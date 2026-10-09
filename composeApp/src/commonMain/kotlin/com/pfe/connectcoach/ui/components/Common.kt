@@ -2,6 +2,7 @@ package com.pfe.connectcoach.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -11,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -29,7 +32,7 @@ fun AppCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
-        color = Color.White,
+        color = AppColors.Card,
         shadowElevation = 3.dp,
     ) { Column(Modifier.padding(16.dp), content = content) }
 }
@@ -57,7 +60,15 @@ fun CoralButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(height),
+        modifier = modifier.height(height).drawBehind {
+            // darker "pressed-edge" under the button, like the reference
+            drawRoundRect(
+                AppColors.CoralDark,
+                topLeft = Offset(0f, 3.dp.toPx()),
+                size = size,
+                cornerRadius = CornerRadius(size.height / 2),
+            )
+        },
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(containerColor = AppColors.Coral, contentColor = Color.White),
         contentPadding = PaddingValues(horizontal = 20.dp),
@@ -74,9 +85,10 @@ fun CoralButton(
 fun PillChip(text: String, selected: Boolean = false, onClick: () -> Unit = {}) {
     Box(
         Modifier.clip(CircleShape)
-            .background(if (selected) AppColors.Forest else AppColors.Beige)
+            .background(if (selected) AppColors.Forest else Color.Transparent)
+            .border(1.5.dp, AppColors.Forest, CircleShape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .padding(horizontal = 16.dp, vertical = 9.dp)
     ) {
         Text(
             text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
@@ -123,7 +135,7 @@ fun ProgressRing(progress: Float, color: Color, caption: String, size: Dp = 76.d
 fun BottomNavBar(selected: AppTab, onSelect: (AppTab) -> Unit) {
     Surface(
         shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
-        color = Color.White,
+        color = AppColors.Card,
         shadowElevation = 12.dp,
     ) {
         Row(
