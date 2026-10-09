@@ -3,10 +3,11 @@ name: Build iOS App for Appetize
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
     - name: Checkout repository
@@ -25,6 +26,10 @@ jobs:
       run: |
         chmod +x gradlew
         ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+    - name: Check framework output
+      run: |
+        ls -R composeApp/build/bin/iosSimulatorArm64/debugFramework | head -20
 
     - name: Install XcodeGen
       run: brew install xcodegen
@@ -46,31 +51,46 @@ jobs:
             settings:
               base:
                 PRODUCT_BUNDLE_IDENTIFIER: com.pfe.connectcoach.iosApp
+                SWIFT_VERSION: "5.0"
                 GENERATE_INFOPLIST_FILE: YES
                 INFOPLIST_KEY_UILaunchScreen_Generation: YES
+                INFOPLIST_KEY_CFBundleDisplayName: "Connect with Your Coach"
                 CODE_SIGNING_ALLOWED: "NO"
                 CODE_SIGNING_REQUIRED: "NO"
                 CODE_SIGN_IDENTITY: ""
+                ARCHS: arm64
+                EXCLUDED_ARCHS: x86_64
                 FRAMEWORK_SEARCH_PATHS:
                   - $(inherited)
                   - $(SRCROOT)/composeApp/build/bin/iosSimulatorArm64/debugFramework
                 OTHER_LDFLAGS:
                   - $(inherited)
-                  - -framework composeApp
+                  - -framework
+                  - ComposeApp
         EOF
         xcodegen generate
 
     - name: Build iOS App with Xcode
       run: |
+        set -o pipefail
         xcodebuild -project iosApp.xcodeproj \
                    -scheme iosApp \
                    -sdk iphonesimulator \
                    -configuration Debug \
                    -derivedDataPath build/ \
+                   ARCHS=arm64 \
+                   ONLY_ACTIVE_ARCH=YES \
                    CODE_SIGNING_ALLOWED=NO \
                    CODE_SIGNING_REQUIRED=NO \
                    CODE_SIGN_IDENTITY="" \
-                   ONLY_ACTIVE_ARCH=NO
+                   2>&1 | tee xcodebuild.log
+
+    - name: Upload Xcode log on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: xcodebuild-log
+        path: xcodebuild.log
 
     - name: Compress .app bundle
       run: |
